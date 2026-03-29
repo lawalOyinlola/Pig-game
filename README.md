@@ -16,8 +16,8 @@
 1. **Configure:** Set your Target Score (default 100) and Penalty Die (default 6). Choose your mode (Normal or Hardcore).
 2. **Roll:** Click "Roll Dice" to accumulate points.
 3. **Avoid Penalties:**
-   - In **Normal Mode**, rolling a 1 or the Penalty Die resets your *current* turn score and switches players.
-   - In **Hardcore Mode**, rolling a Penalty Die *deducts* your current turn's points from your *total* score.
+   - In **Normal Mode**, rolling a Penalty Die resets your _current_ turn score and switches players.
+   - In **Hardcore Mode**, rolling a Penalty Die _deducts_ your current turn's points from your _total_ score.
 4. **Hold:** Click "Hold" to add your current turn points to your total bank.
 5. **Win:** Be the first to reach the target score **exactly**. If you exceed it, you miss your turn (and face a penalty in Hardcore mode).
 
@@ -27,7 +27,7 @@
 graph TD
     Start([Start Game]) --> Init[Initialize Scores & Rules]
     Init --> Turn{Active Player Turn}
-    
+
     Turn --> Roll[Roll Dice]
     Roll --> CheckDice{Is Penalty Die?}
     CheckDice -- Yes (Normal) --> TurnLost[Turn Lost: Reset Current Score]
@@ -35,18 +35,18 @@ graph TD
     Penalty --> TurnLost
     TurnLost --> Switch[Switch Player]
     Switch --> Turn
-    
+
     CheckDice -- No --> Accumulate[Add to Current Score]
     Accumulate --> Choice{Hold or Roll?}
     Choice -- Roll --> Roll
-    
+
     Choice -- Hold --> Calc[Total Score + Current Score]
     Calc --> WinCheck{Is Exactly Target?}
     WinCheck -- Yes --> Winner([WINNER!])
     WinCheck -- No (Exceeded) --> Over[Turn Lost: No points added]
     Over -- Hardcore --> Penalty
     Over -- Normal --> Switch
-    
+
     WinCheck -- No (Under) --> Save[Save Total Score]
     Save --> Switch
 ```
@@ -61,6 +61,7 @@ graph TD
 ## 🚀 Optimization & SEO
 
 Lumina Dice is optimized for fast performance and search engine visibility:
+
 - **Meta Tags:** Comprehensive description and keyword mapping.
 - **Accessibility:** ARIA roles and keyboard navigation (Esc to close modals).
 - **Mobile First:** Responsive breakpoints for a seamless mobile experience.
