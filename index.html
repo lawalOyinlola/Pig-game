@@ -1,36 +1,593 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <meta
+      name="description"
+      content="Lumina Dice: A premium risk-strategy dice game with custom rules and hardcore mode. Experience high-stakes gaming."
+    />
+    <meta
+      name="keywords"
+      content="Lumina Dice, Dice Game, Strategy Game, JavaScript Game, Glassmorphism UI, Web Game"
+    />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='4' y='4' width='24' height='24' rx='6' fill='none' stroke='%23ff2a70' stroke-width='2.5'/%3E%3Ccircle cx='16' cy='16' r='3.5' fill='%23ff2a70'/%3E%3C/svg%3E"
+    />
+    <title>Lumina Dice | Premium Risk Strategy</title>
+
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              accent: '#ff2a70',
+              'accent-glow': 'rgba(255, 42, 112, 0.4)',
+              glass: 'rgba(255, 255, 255, 0.03)',
+              'glass-border': 'rgba(255, 255, 255, 0.08)',
+              'modal-bg': 'rgba(15, 32, 39, 0.98)',
+              winner: '#2bc06a',
+              neon: '#00f5ff',
+            },
+            fontFamily: {
+              outfit: ['Outfit', 'sans-serif'],
+            },
+            backdropBlur: {
+              xs: '4px',
+            },
+            boxShadow: {
+              glow: '0 0 20px rgba(255, 42, 112, 0.4)',
+              'glow-lg': '0 0 30px rgba(255, 42, 112, 0.5)',
+              'neon-glow': '0 0 20px rgba(0, 245, 255, 0.3)',
+              'neon-glow-lg': '0 0 30px rgba(0, 245, 255, 0.3)',
+              winner: '0 0 20px rgba(43, 192, 106, 0.4)',
+              modal: '0 40px 60rem rgba(0,0,0,0.8)',
+              overlay: '0 2rem 5rem rgba(0,0,0,0.4)',
+            },
+            animation: {
+              'spin-slow': 'spin 1s ease-in-out',
+              shake: 'shake 0.4s ease-in-out',
+            },
+            keyframes: {
+              shake: {
+                '0%, 100%': { transform: 'translateX(-50%)' },
+                '25%': { transform: 'translateX(-52%) rotate(-5deg)' },
+                '75%': { transform: 'translateX(-48%) rotate(5deg)' },
+              },
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      /* Custom Premium Scrollbar */
+      .modal::-webkit-scrollbar {
+        width: 6px;
+      }
+      .modal::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 10px;
+      }
+      .modal::-webkit-scrollbar-thumb {
+        /* background: rgba(255, 71, 87, 0.2); */
+        background: rgba(254, 42, 112, 0.4);
+        border-radius: 10px;
+      }
+      .modal::-webkit-scrollbar-thumb:hover {
+        background: rgba(254, 42, 112, 0.4);
+      }
+    </style>
+
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="style.css" />
-    <title>Pig Game</title>
+    <!-- Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   </head>
-  <body>
-    <main>
-      <section class="player player--0 player--active">
-        <h2 class="name" id="name--0">Player 1</h2>
-        <p class="score" id="score--0">43</p>
-        <div class="current">
-          <p class="current-label">Current</p>
-          <p class="current-score" id="current--0">0</p>
-        </div>
-      </section>
-      <section class="player player--1">
-        <h2 class="name" id="name--1">Player 2</h2>
-        <p class="score" id="score--1">24</p>
-        <div class="current">
-          <p class="current-label">Current</p>
-          <p class="current-score" id="current--1">0</p>
+  <body
+    class="font-outfit text-white/90 flex flex-col items-center justify-center min-h-screen overflow-hidden"
+  >
+    <!-- Info button -->
+    <button
+      class="btn-info absolute top-8 right-8 text-white/70 bg-transparent border-none cursor-pointer z-[100] transition-all duration-300 hover:text-white hover:scale-110 hover:rotate-[15deg] hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]"
+      aria-label="Game Rules"
+    >
+      <svg
+        width="32"
+        height="32"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+        <path
+          d="M12 16V12"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+        <path
+          d="M12 8H12.01"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+    </button>
+
+    <!-- New Game Button (Always Top, Responsive Placement) -->
+    <button
+      class="btn btn--new absolute left-1/2 top-[4.5rem] -translate-x-1/2 flex items-center gap-3 text-white bg-accent/10 border border-accent/20 rounded-xl px-8 py-4 text-[1.4rem] uppercase font-medium tracking-wide cursor-pointer transition-all duration-300 hover:bg-accent/20 hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0.5 z-[100] max-sm:top-8 max-sm:left-8 max-sm:translate-x-0 max-sm:px-6 max-sm:py-3.5"
+    >
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+        />
+        <path
+          d="M12 2V6"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+        />
+        <path
+          d="M16 6L12 2L8 6"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+      New game
+    </button>
+
+    <!-- Game Board -->
+    <main
+      class="relative w-[100rem] h-[60rem] bg-glass backdrop-blur-2xl border border-glass-border shadow-overlay rounded-2xl overflow-hidden flex max-sm:flex-col max-sm:w-[95vw] max-sm:h-[85vh]"
+    >
+      <!-- Player 1 -->
+      <section
+        class="player player--0 player--active flex-1 flex flex-col items-center pt-[9rem] pb-[9rem] px-12 transition-all duration-700 max-sm:pt-12 max-sm:pb-8 max-sm:px-8"
+      >
+        <h2
+          class="name relative text-[4rem] uppercase tracking-widest font-light mb-4 text-white/70 text-shadow-sm max-sm:text-[3rem]"
+          id="name--0"
+        >
+          Player 1
+        </h2>
+        <p
+          class="score text-[8rem] font-light text-accent drop-shadow-[0_0_20px_rgba(255,42,112,0.4)] mb-auto max-sm:text-[6rem]"
+          id="score--0"
+        >
+          0
+        </p>
+        <div
+          class="current w-[65%] p-8 text-center rounded-xl border border-accent/40 bg-accent/85 backdrop-blur-sm shadow-md opacity-50 translate-y-2.5 transition-all duration-500 max-sm:w-4/5"
+          class="current w-[65%] p-8 text-center rounded-xl border border-accent/40 bg-accent/85 backdrop-blur-sm shadow-md opacity-50 translate-y-2.5 transition-all duration-500 max-sm:w-4/5 max-sm:p-4"
+        >
+          <p
+            class="current-label text-xs uppercase tracking-widest text-white/80 mb-2"
+          >
+            Current
+          </p>
+          <p class="current-score text-[3rem] font-semibold" id="current--0">
+            0
+          </p>
         </div>
       </section>
 
-      <img src="dice-5.png" alt="Playing dice" class="dice" />
-      <button class="btn btn--new">🔄 New game</button>
-      <button class="btn btn--roll">🎲 Roll dice</button>
-      <button class="btn btn--hold">📥 Hold</button>
+      <!-- Player 2 -->
+      <section
+        class="player player--1 flex-1 flex flex-col items-center pt-[9rem] pb-[9rem] px-12 transition-all duration-700 max-sm:pt-8 max-sm:pb-12 max-sm:px-8 max-sm:order-3"
+      >
+        <h2
+          class="name relative text-[4rem] uppercase tracking-widest font-light mb-4 text-white/70 max-sm:text-[2.5rem]"
+          id="name--1"
+        >
+          Player 2
+        </h2>
+        <p
+          class="score text-[8rem] font-light text-accent drop-shadow-[0_0_20px_rgba(255,42,112,0.4)] mb-auto max-sm:text-[5rem]"
+          id="score--1"
+        >
+          0
+        </p>
+        <div
+          class="current w-[65%] p-8 text-center rounded-xl border border-accent/40 bg-accent/85 backdrop-blur-sm shadow-md opacity-50 translate-y-2.5 transition-all duration-500 max-sm:w-4/5 max-sm:p-4"
+        >
+          <p
+            class="current-label text-xs uppercase tracking-widest text-white/80 mb-2"
+          >
+            Current
+          </p>
+          <p class="current-score text-[3rem] font-semibold" id="current--1">
+            0
+          </p>
+        </div>
+      </section>
+
+      <!-- Divider (Desktop Only) -->
+      <div
+        class="absolute left-1/2 top-0 bottom-0 w-px bg-white/[0.06] -translate-x-1/2 pointer-events-none max-sm:hidden"
+      ></div>
+
+      <!-- Controls Wrapper -->
+      <div
+        class="game-controls absolute inset-0 pointer-events-none z-50 flex flex-col items-center max-sm:relative max-sm:pointer-events-auto max-sm:order-2 max-sm:justify-center max-sm:py-12 max-sm:px-8 max-sm:bg-white/5 max-sm:backdrop-blur-xl max-sm:border-y max-sm:border-white/10"
+      >
+        <!-- Dice -->
+        <img
+          src="dice-5.png"
+          alt="Playing dice"
+          class="dice hidden absolute left-1/2 top-[16.5rem] -translate-x-1/2 h-[10rem] shadow-lg rounded-xl transition-transform duration-300 pointer-events-auto max-sm:relative max-sm:top-0 max-sm:left-0 max-sm:translate-x-0 max-sm:h-[8rem] max-sm:mb-8"
+        />
+
+        <!-- Action Buttons Group (Side-by-side on Mobile) -->
+        <div
+          class="flex flex-col items-center gap-12 max-sm:flex-row max-sm:gap-4 max-sm:w-full max-sm:justify-center"
+        >
+          <!-- Roll Button -->
+          <button
+            class="btn btn--roll absolute left-1/2 top-[39.3rem] -translate-x-1/2 flex items-center gap-3 text-white bg-white/10 border border-white/20 rounded-xl px-8 py-4 text-[1.4rem] uppercase font-medium tracking-wide cursor-pointer transition-all duration-300 hover:bg-white/20 hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0.5 pointer-events-auto max-sm:relative max-sm:top-0 max-sm:left-0 max-sm:translate-x-0 max-sm:px-6 max-sm:flex-1 max-sm:justify-center"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <rect
+                x="3"
+                y="3"
+                width="18"
+                height="18"
+                rx="4"
+                stroke="currentColor"
+                stroke-width="2"
+              />
+              <circle cx="8.5" cy="8.5" r="1.5" fill="currentColor" />
+              <circle cx="15.5" cy="15.5" r="1.5" fill="currentColor" />
+              <circle cx="15.5" cy="8.5" r="1.5" fill="currentColor" />
+              <circle cx="8.5" cy="15.5" r="1.5" fill="currentColor" />
+              <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+            </svg>
+            Roll dice
+          </button>
+
+          <!-- Hold Button -->
+          <button
+            class="btn btn--hold absolute left-1/2 top-[47rem] -translate-x-1/2 flex items-center gap-3 text-white bg-accent/10 border border-accent/20 rounded-xl px-8 py-4 text-[1.4rem] uppercase font-medium tracking-wide cursor-pointer transition-all duration-300 hover:bg-accent/20 hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0.5 pointer-events-auto max-sm:relative max-sm:top-0 max-sm:left-0 max-sm:translate-x-0 max-sm:px-6 max-sm:flex-1 max-sm:justify-center"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M12 3V16M12 16L8 12M12 16L16 12"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M4 21H20"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            Hold
+          </button>
+        </div>
+      </div>
     </main>
+
+    <!-- Rules Modal -->
+    <div
+      class="modal modal--rules fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[200] w-[90%] max-w-[62rem] max-h-[85vh] overflow-y-auto bg-modal-bg backdrop-blur-xl border border-white/10 rounded-[24px] shadow-modal flex flex-col gap-8 p-[4rem_4rem_4rem]"
+      role="dialog"
+      aria-labelledby="rules-title"
+      aria-modal="true"
+    >
+      <!-- Header -->
+      <div class="modal-header flex items-center justify-between">
+        <div class="flex items-center gap-4">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            class="text-white"
+          >
+            <path
+              d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
+              stroke="currentColor"
+              stroke-width="2"
+            />
+            <path
+              d="M12 16V12"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+            />
+            <path
+              d="M12 8H12.01"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+            />
+          </svg>
+          <h2
+            class="text-[2.2rem] uppercase tracking-widest text-white font-bold"
+            id="rules-title"
+          >
+            Lumina Dice Rules
+          </h2>
+        </div>
+      </div>
+
+      <!-- Game Intensity -->
+      <div
+        class="intensity-section bg-white/10 border border-white/5 rounded-2xl p-6 flex items-center justify-between gap-6 max-sm:flex-col max-sm:items-start"
+      >
+        <div>
+          <h3
+            class="text-[1.3rem] uppercase tracking-[0.2em] text-white/60 font-bold"
+          >
+            Game Intensity
+          </h3>
+          <p class="text-[1.1rem] text-white/40 font-medium whitespace-nowrap">
+            Select your difficulty level
+          </p>
+        </div>
+
+        <div
+          class="pill-toggle flex bg-black/30 p-2 rounded-full w-fit border border-white/5 shadow-inner"
+        >
+          <button
+            class="btn-mode px-10 py-2.5 text-[1.3rem] font-bold rounded-full transition-all duration-300 active:scale-95"
+            data-mode="normal"
+          >
+            Normal
+          </button>
+          <button
+            class="btn-mode px-10 py-2.5 text-[1.3rem] font-bold rounded-full transition-all duration-300 active:scale-95"
+            data-mode="hardcore"
+          >
+            Hardcore
+          </button>
+        </div>
+      </div>
+
+      <!-- Protocols Container -->
+      <div class="protocols-container space-y-6">
+        <!-- Normal Card -->
+        <div
+          class="protocol-card protocol--normal p-8 rounded-2xl bg-white/2 border-l-4 border-neon/50 transition-all duration-500 opacity-40"
+        >
+          <div class="flex items-center gap-3 mb-6 text-neon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M13 2L3 14H12L11 22L21 10H12L13 2Z"
+                fill="currentColor"
+              />
+            </svg>
+            <h4 class="text-[1.2rem] uppercase tracking-widest font-bold">
+              Standard Protocol
+            </h4>
+          </div>
+          <p
+            class="text-[1.3rem] leading-relaxed text-white/70 font-medium mb-8"
+          >
+            Roll the dice to accumulate points. If you roll a
+            <span class="penalty-val text-neon font-bold">1</span>, you lose
+            your current points and pass the turn to the next player. Hold to
+            add current points to your total.
+          </p>
+          <p class="text-[1.2rem] italic text-neon/80 font-medium">
+            Catch: You must reach exactly
+            <span class="win-val">100</span> points to win!
+          </p>
+        </div>
+
+        <!-- Hardcore Card -->
+        <div
+          class="protocol-card protocol--hardcore p-8 rounded-2xl bg-white/2 border-l-4 border-accent/50 transition-all duration-500 opacity-40"
+        >
+          <div class="flex items-center gap-3 mb-6 text-accent">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M12 22C12 22 20 18 20 12V5L12 2L4 5V12C4 18 12 22 12 22Z"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linejoin="round"
+              />
+            </svg>
+            <h4 class="text-[1.2rem] uppercase tracking-widest font-bold">
+              Hardcore Mode
+            </h4>
+          </div>
+          <p
+            class="text-[1.3rem] leading-relaxed text-white/70 font-medium mb-4"
+          >
+            Same as Normal, but if you roll a
+            <span class="penalty-val text-accent font-bold">1</span> OR exceed
+            <span class="win-val font-bold">100</span> on a hold, your points
+            are <span class="text-accent font-bold italic">DEDUCTED</span>!
+          </p>
+          <p class="text-[1.2rem] text-white/40 font-medium italic">
+            Minimum score is 0.
+          </p>
+        </div>
+      </div>
+
+      <!-- Final Settings -->
+      <div class="grid grid-cols-2 gap-8 max-sm:grid-cols-1">
+        <div class="setting-input-group space-y-3">
+          <label
+            class="text-[1.2rem] uppercase tracking-widest text-white/60 font-bold"
+            >Target Score</label
+          >
+          <div class="relative group">
+            <input
+              type="text"
+              id="win-score-input"
+              value="100"
+              class="w-full bg-black/40 border border-white/10 rounded-xl px-6 py-5 text-[1.6rem] font-bold text-white focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/30 transition-all duration-300"
+            />
+            <svg
+              class="absolute right-6 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-accent/50 transition-colors"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+          </div>
+        </div>
+        <div class="setting-input-group space-y-3">
+          <label
+            class="text-[1.2rem] uppercase tracking-widest text-white/60 font-bold"
+            >Penalty Die</label
+          >
+          <div class="relative group">
+            <input
+              type="text"
+              id="penalty-die-input"
+              value="6"
+              class="w-full bg-black/40 border border-white/10 rounded-xl px-6 py-5 text-[1.6rem] font-bold text-white focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/30 transition-all duration-300"
+            />
+            <svg
+              class="absolute right-6 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-accent/50 transition-colors"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                stroke-linecap="round"
+              />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Final Actions -->
+      <div
+        class="flex items-center justify-end gap-10 mt-6 max-sm:justify-center max-sm:mt-10"
+      >
+        <button
+          id="btn-secondary"
+          class="hidden flex items-center gap-3 text-white bg-white/10 border border-white/20 rounded-xl px-8 py-4 text-[1.4rem] uppercase font-medium tracking-wide cursor-pointer transition-all duration-300 hover:bg-white/20 hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0.5"
+        >
+          Close
+        </button>
+        <button
+          id="btn-primary"
+          class="btn btn--roll flex items-center gap-3 text-white rounded-xl px-14 py-4 font-bold text-[1.4rem] uppercase tracking-wide cursor-pointer transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0.5"
+        >
+          Start Game
+        </button>
+      </div>
+    </div>
+
+    <!-- Notification Modal -->
+    <div
+      class="modal modal--notification hidden fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[200] w-[90%] max-w-[55rem] bg-white/10 backdrop-blur-2xl border border-white/10 rounded-[20px] shadow-modal p-16 text-center"
+      role="dialog"
+      aria-labelledby="notif-title"
+      aria-describedby="notif-text"
+      aria-modal="true"
+    >
+      <button
+        class="close-modal absolute top-6 right-8 text-[3.5rem] leading-none text-white/50 bg-transparent border-none cursor-pointer transition-colors duration-300 hover:text-white"
+        aria-label="Close modal"
+      >
+        &times;
+      </button>
+      <div
+        id="notif-icon-container"
+        class="flex justify-center mb-8 scale-0 transition-transform duration-700"
+      >
+        <!-- Icon injected by JS -->
+      </div>
+      <h2
+        class="text-[3rem] uppercase tracking-widest text-white font-semibold mb-2"
+        id="notif-title"
+      >
+        Turn Lost!
+      </h2>
+      <p
+        class="text-[1.8rem] leading-relaxed text-white/80 mt-6"
+        id="notif-text"
+      >
+        You rolled a 1. It is the next player's turn.
+      </p>
+      <button
+        id="btn-play-again"
+        class="hidden w-full mt-12 px-10 py-5 text-[1.5rem] font-bold uppercase tracking-widest text-white bg-winner rounded-xl shadow-winner hover:shadow-[0_0_30px_rgba(43,192,106,0.5)] transition-all duration-300 hover:-translate-y-1 active:translate-y-0.5"
+      >
+        Play Again
+      </button>
+    </div>
+
+    <!-- Overlay -->
+    <div
+      class="overlay fixed inset-0 bg-black/60 backdrop-blur-sm z-[150] transition-all duration-300"
+    ></div>
+
+    <!-- Footer -->
+    <footer
+      class="footer absolute bottom-8 text-[1.4rem] text-white/50 tracking-widest"
+    >
+      Developed by
+      <a
+        href="https://lawaloyinlola.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="text-accent no-underline font-bold transition-all duration-300 hover:text-white hover:drop-shadow-[0_0_10px_rgba(255,42,112,0.8)]"
+        >LAWAL</a
+      >
+    </footer>
+
+    <!-- Confetti Library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="script.js"></script>
   </body>
 </html>
